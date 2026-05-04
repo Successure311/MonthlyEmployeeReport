@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+TiDB/TiDB_Credentials.json
+*.xls
+*.xlsx
+.vscode/
+venv/
