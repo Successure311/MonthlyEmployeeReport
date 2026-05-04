@@ -672,6 +672,10 @@ def find_report_files():
 def index():
     return send_from_directory('.', 'index.html')
 
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
+
 
 @app.route('/api/reports')
 def get_reports():
