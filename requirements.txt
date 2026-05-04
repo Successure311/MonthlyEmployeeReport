@@ -2,7 +2,5 @@ flask
 flask-cors
 xlrd==1.2.0
 xlsxwriter
-mysql-connector-python
-python-dotenv
 gunicorn
 xlutils

@@ -9,16 +9,12 @@ import xlsxwriter
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from process_attendance import process_report
-from database import get_all_reports_from_db, get_report_data_from_db, save_report_to_db, init_db
+# No DB imports
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
-# Initialize DB on startup
-try:
-    init_db()
-except Exception as e:
-    print(f"Warning: DB initialization failed: {e}")
+# No DB initialization
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -679,14 +675,9 @@ def send_static(path):
 
 @app.route('/api/reports')
 def get_reports():
-    """Get list of available report files from DB."""
-    try:
-        db_reports = get_all_reports_from_db()
-        return jsonify({'reports': db_reports})
-    except Exception as e:
-        # Fallback to files if DB fails
-        files = find_report_files()
-        return jsonify({'reports': files, 'db_error': str(e)})
+    """Get list of available report files from disk."""
+    files = find_report_files()
+    return jsonify({'reports': files})
 
 
 @app.route('/api/upload', methods=['POST'])
@@ -711,37 +702,23 @@ def upload_file():
             # Process the file in-place (cleanup Sat/Sun etc.)
             process_report(filepath, filepath)
             
-            # Parse and save to DB
-            report_data = parse_work_duration_report(filepath)
-            save_report_to_db(report_data, filename)
-            
-            return jsonify({'message': 'File uploaded, processed, and saved to database', 'filename': filename})
+            return jsonify({'message': 'File uploaded and processed', 'filename': filename})
         except Exception as e:
             return jsonify({'error': f'Operation failed: {str(e)}'}), 500
         finally:
-            # Optionally remove local file after DB save to keep Render disk clean
-            if os.path.exists(filepath) and os.getenv('RENDER'):
-                os.remove(filepath)
+            pass
             
     return jsonify({'error': 'Invalid file type. Only .xls and .xlsx allowed.'}), 400
 
 @app.route('/api/analysis/<filename>')
 def get_analysis(filename):
-    """Fetch analysis from DB."""
+    """Fetch analysis from disk."""
     try:
-        report_data = get_report_data_from_db(filename)
-        if not report_data:
-            # Fallback to parsing file if not in DB
-            filepath = os.path.join(DATA_DIR, filename)
-            if not os.path.exists(filepath):
-                return jsonify({'error': f'Report not found in DB or disk: {filename}'}), 404
-            report_data = parse_work_duration_report(filepath)
+        filepath = os.path.join(DATA_DIR, filename)
+        if not os.path.exists(filepath):
+            return jsonify({'error': f'Report not found on disk: {filename}'}), 404
             
-        # DEBUG: Verify data structure from DB
-        if report_data and report_data.get('employees'):
-            e0 = report_data['employees'][0]
-            print(f"DEBUG: Emp0 keys: {list(e0.keys())}", flush=True)
-            print(f"DEBUG: Emp0 Sat: {e0.get('saturdayCount')}, Sun: {e0.get('sundayCount')}", flush=True)
+        report_data = parse_work_duration_report(filepath)
             
         analysis = compute_analysis(report_data)
         return jsonify({
