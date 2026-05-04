@@ -558,6 +558,7 @@ def compute_analysis(report_data):
         ns_count = emp.get('nsShiftCount', 0)
         final_absent_count = ns_count
 
+        print(f"compute_analysis: {emp['name']} sat={emp.get('saturdayCount')} sun={emp.get('sundayCount')}", flush=True)
         employees_analysis.append({
             'id': emp['id'],
             'name': emp['name'],

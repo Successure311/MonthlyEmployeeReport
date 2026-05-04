@@ -169,6 +169,8 @@ async function loadAnalysis(filename) {
       return;
     }
     currentData = data;
+    console.log("API Response employees[0]:", data.employees[0]);
+    console.log("saturdayCount:", data.employees[0]?.saturdayCount, "sundayCount:", data.employees[0]?.sundayCount);
     renderDashboard(data);
     document.getElementById("exportExcelBtn").style.display = "flex";
   } catch (err) {
