@@ -107,6 +107,20 @@ def init_db():
     )
     """)
     
+    # Employee Reports stats table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS employee_report_stats (
+        report_id INT,
+        employee_id VARCHAR(50),
+        saturday_count INT DEFAULT 0,
+        sunday_count INT DEFAULT 0,
+        ns_shift_count INT DEFAULT 0,
+        PRIMARY KEY (report_id, employee_id),
+        FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE,
+        FOREIGN KEY (employee_id) REFERENCES employees(id)
+    )
+    """)
+    
     conn.commit()
     cursor.close()
     conn.close()
@@ -131,7 +145,15 @@ def save_report_to_db(report_data, filename):
             cursor.execute("INSERT INTO employees (id, name) VALUES (%s, %s) ON DUPLICATE KEY UPDATE name=%s",
                            (emp['id'], emp['name'], emp['name']))
             
-            # 3. Insert Attendance
+            # 3. Insert Stats
+            cursor.execute("""
+                INSERT INTO employee_report_stats (report_id, employee_id, saturday_count, sunday_count, ns_shift_count)
+                VALUES (%s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE saturday_count=%s, sunday_count=%s, ns_shift_count=%s
+            """, (report_id, emp['id'], emp.get('saturdayCount', 0), emp.get('sundayCount', 0), emp.get('nsShiftCount', 0),
+                  emp.get('saturdayCount', 0), emp.get('sundayCount', 0), emp.get('nsShiftCount', 0)))
+            
+            # 4. Insert Attendance
             for day in emp['days']:
                 cursor.execute("""
                 INSERT INTO attendance (
@@ -176,16 +198,21 @@ def get_report_data_from_db(filename):
     
     report_id = report_info['id']
     
-    # Get employees
+    # Get employees with stats
     cursor.execute("""
-        SELECT DISTINCT e.id, e.name 
+        SELECT e.id, e.name, s.saturday_count, s.sunday_count, s.ns_shift_count
         FROM employees e
-        JOIN attendance a ON e.id = a.employee_id
-        WHERE a.report_id = %s
+        JOIN employee_report_stats s ON e.id = s.employee_id
+        WHERE s.report_id = %s
     """, (report_id,))
     employees = cursor.fetchall()
     
     for emp in employees:
+        # Map DB columns to app keys
+        emp['saturdayCount'] = emp.pop('saturday_count')
+        emp['sundayCount'] = emp.pop('sunday_count')
+        emp['nsShiftCount'] = emp.pop('ns_shift_count')
+        
         cursor.execute("""
             SELECT date_label as day, status, in_time as inTime, out_time as outTime, 
                    duration, late_by as lateBy, early_by as earlyBy, late_out as lateOut,
