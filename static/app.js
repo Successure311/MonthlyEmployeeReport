@@ -404,7 +404,7 @@ function renderDashboard(data) {
     {
       label: "SAT | SUN",
       value: `${data.employees.length ? Math.round(totalSat / data.employees.length) : 0} | ${data.employees.length ? Math.round(totalSun / data.employees.length) : 0}`,
-      cls: "blue",
+      cls: "cyan",
       sub: `Avg Saturday/Sunday`,
     },
     {
@@ -482,7 +482,7 @@ function renderSingleEmployee(emp, data) {
     {
       label: "SAT | SUN",
       value: `${emp.saturdayCount || 0} | ${emp.sundayCount || 0}`,
-      cls: "blue",
+      cls: "cyan",
       sub: `In this month`,
     },
     {
