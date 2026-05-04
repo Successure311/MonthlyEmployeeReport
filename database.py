@@ -5,12 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_db_connection():
+def get_db_connection(use_db=True):
     # Priority: Environment Variables (Render) -> Credentials JSON (Local)
     host = os.getenv("TIDB_HOST")
     user = os.getenv("TIDB_USER")
     password = os.getenv("TIDB_PASSWORD")
-    database = os.getenv("TIDB_DATABASE", "test")
+    
+    db_name = os.getenv("TIDB_DATABASE", "MonthlyEmployeeReport")
     port = int(os.getenv("TIDB_PORT", 4000))
     
     # SSL CA handle
@@ -35,7 +36,7 @@ def get_db_connection():
                 host = creds.get("Host")
                 user = creds.get("User")
                 password = creds.get("Password")
-                database = creds.get("Database", "test")
+                database = creds.get("Database", "MonthlyEmployeeReport")
                 port = creds.get("Port", 4000)
                 # Don't override ssl_ca if already found
 
@@ -43,9 +44,11 @@ def get_db_connection():
         "host": host,
         "user": user,
         "password": password,
-        "database": database,
         "port": port,
     }
+    
+    if use_db:
+        config["database"] = db_name
     
     if ssl_ca:
         config["ssl_ca"] = ssl_ca
@@ -53,8 +56,13 @@ def get_db_connection():
     return mysql.connector.connect(**config)
 
 def init_db():
-    conn = get_db_connection()
+    # Connect without specific database to create it
+    conn = get_db_connection(use_db=False)
     cursor = conn.cursor()
+    
+    db_name = os.getenv("TIDB_DATABASE", "MonthlyEmployeeReport")
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
+    cursor.execute(f"USE {db_name}")
     
     # Reports table
     cursor.execute("""
