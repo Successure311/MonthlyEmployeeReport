@@ -80,7 +80,7 @@ function updateThemeUI(isLight) {
 // ============================================
 async function loadReports() {
   try {
-    const res = await fetch(`${API_BASE}/api/reports`);
+    const res = await fetch(`${API_BASE}/api/reports?v=${Date.now()}`);
     const data = await res.json();
     const select = document.getElementById("reportSelect");
     select.innerHTML = '<option value="">-- Choose Month --</option>';
@@ -98,7 +98,7 @@ async function loadReports() {
 async function loadLeaves() {
   showLoading(true);
   try {
-    const res = await fetch(`${API_BASE}/api/leaves`);
+    const res = await fetch(`${API_BASE}/api/leaves?v=${Date.now()}`);
     const data = await res.json();
     if (data.error) {
       alert(data.error);
@@ -160,7 +160,7 @@ async function loadAnalysis(filename) {
   showLoading(true);
   try {
     const res = await fetch(
-      `${API_BASE}/api/analysis/${encodeURIComponent(filename)}`,
+      `${API_BASE}/api/analysis/${encodeURIComponent(filename)}?v=${Date.now()}`,
     );
     const data = await res.json();
     if (data.error) {
