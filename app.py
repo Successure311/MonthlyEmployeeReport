@@ -157,27 +157,35 @@ def parse_work_duration_report(filepath):
                                       'Duration', 'Late By', 'Early By', 'OT', 'Shift']
                     
                     # Detect weekend columns and exact day numbers from row 7 (index 6)
-                    sat_sun_cols = []
                     sat_cols = []
                     sun_cols = []
                     col_to_date = {}
                     if ws.nrows > 6:
                         for c in range(1, ws.ncols):
-                            val_str = str(ws.cell_value(6, c)).strip()
-                            # Parse things like "1 Th", "3 St"
-                            match = re.search(r'^(\d+)\s+([A-Za-z]+)', val_str)
+                            val_str = str(ws.cell_value(6, c)).strip().lower()
+                            if not val_str:
+                                continue
+                                
+                            # Parse things like "1 Th", "3 St", "4 S"
+                            match = re.search(r'(\d+)', val_str)
                             if match:
                                 day_num = int(match.group(1))
-                                day_str = match.group(2).lower()
                                 col_to_date[c] = day_num
-                                if day_str in ["sa", "sat", "st"]:
-                                    sat_sun_cols.append(c)
-                                    sat_cols.append(c)
-                                elif day_str in ["su", "sun", "s"]:
-                                    sat_sun_cols.append(c)
-                                    sun_cols.append(c)
+                                
+                            # Robust weekend detection: check if string contains weekend indicators
+                            if any(x in val_str for x in ["sa", "st"]):
+                                sat_cols.append(c)
+                            elif any(x in val_str for x in ["su", "sn", " s"]): # " s" to avoid matching "st"
+                                sun_cols.append(c)
+                            elif val_str.endswith(" s") or val_str == "s":
+                                sun_cols.append(c)
 
+                    # Calculate monthly totals once
+                    report_saturday_count = len(sat_cols)
+                    report_sunday_count = len(sun_cols)
+                    
                     search_r = r + 1
+                    # ... (rest of search loop)
                     while search_r < min(r + 10, ws.nrows):
                         label = str(ws.cell_value(search_r, 0)).strip()
                         if label in labels_to_find:
@@ -195,8 +203,6 @@ def parse_work_duration_report(filepath):
                     
                     has_any_data = False
                     
-                    saturday_count = 0
-                    sunday_count = 0
                     ns_shift_count = 0
 
                     for c in range(start_col_offset, len(status_row)):
@@ -238,12 +244,11 @@ def parse_work_duration_report(filepath):
                             status = 'P'
                         
                         # If this column index in the sheet is a weekend, we skip appending it
-                        if sheet_col_idx in sat_cols:
-                            saturday_count += 1
+                        if sheet_col_idx in sat_cols or sheet_col_idx in sun_cols:
                             continue
-                        elif sheet_col_idx in sun_cols:
-                            sunday_count += 1
-                            continue
+                    
+                    if emp_name == 'Sagar Tarsariya':
+                        print(f"DEBUG: {emp_name} - Sat: {report_saturday_count}, Sun: {report_sunday_count}, Days: {len(days)}")
 
                         # Weekdays only from here for NS count
                         if shift_upper == 'NS':
@@ -378,17 +383,16 @@ def parse_work_duration_report(filepath):
                                 'isForgotPunchIn': is_forgot_punch_in,
                                 'isForgotPunchOut': is_forgot_punch_out
                             })
-
-
-                    # Only append employee if they actually have data (this filters out the completely cleared excluded employees)
+                    
+                    # Only append employee if they actually have data
                     if has_any_data:
                         employees.append({
                             'id': emp_id,
                             'name': emp_name,
                             'summary': summary,
                             'days': days,
-                            'saturdayCount': saturday_count,
-                            'sundayCount': sunday_count,
+                            'saturdayCount': report_saturday_count,
+                            'sundayCount': report_sunday_count,
                             'nsShiftCount': ns_shift_count
                         })
             r += 1
