@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from process_attendance import process_report
 from database import get_all_reports_from_db, get_report_data_from_db, save_report_to_db, init_db
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
 # Initialize DB on startup
