@@ -737,6 +737,12 @@ def get_analysis(filename):
                 return jsonify({'error': f'Report not found in DB or disk: {filename}'}), 404
             report_data = parse_work_duration_report(filepath)
             
+        # DEBUG: Verify data structure from DB
+        if report_data and report_data.get('employees'):
+            e0 = report_data['employees'][0]
+            print(f"DEBUG: Emp0 keys: {list(e0.keys())}", flush=True)
+            print(f"DEBUG: Emp0 Sat: {e0.get('saturdayCount')}, Sun: {e0.get('sundayCount')}", flush=True)
+            
         analysis = compute_analysis(report_data)
         return jsonify({
             'month': report_data['month'],
