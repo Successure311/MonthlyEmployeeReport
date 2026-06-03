@@ -269,18 +269,8 @@ def parse_work_duration_report(filepath):
                         late_out_mins = 0
                         is_work_status = status.strip().upper() == 'P'
                         if is_work_status or in_time.strip() or out_time.strip():
-                            # Define custom configurations for specific employees
-                            custom_times = {
-                                'Sagar Tarsariya': ('08:45', '17:00'),
-                                'Kalpan Shroff': ('08:45', '17:00'),
-                                'Moin Shaikh': ('08:45', '17:00'),
-                                'Sagar Limbasiya': ('08:45', '17:00'),
-                                'Krunal': ('08:45', '17:00'),
-                                'Gopal': ('08:45', '17:00'),
-                                'Vatsal': ('09:00', '17:45')
-                            }
-                            # Default is 08:45 to 05:45 PM
-                            target_in_str, target_out_str = custom_times.get(emp_name, ('08:45', '17:45'))
+                             # All employees have 08:45 in time and 17:15 out time
+                             target_in_str, target_out_str = ('08:45', '17:15')
                             
                             is_forgot_punch_in = False
                             is_forgot_punch_out = False

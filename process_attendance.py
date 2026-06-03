@@ -37,14 +37,14 @@ def process_report(input_file, output_file):
     print(f"Detected Saturday/Sunday columns: {global_sat_sun_cols}")
 
     # Custom thresholds
-    DEFAULT_LATE_THRESHOLD = datetime.datetime.strptime("08:45", "%H:%M")
-    DEFAULT_OUT_THRESHOLD = datetime.datetime.strptime("17:45", "%H:%M")
-    
-    SPECIAL_EMPLOYEES = ['Sagar T', 'Kalpan Shroff', 'Moin Shaikh', 'Sagar', 'Krunal']
-    SPECIAL_OUT_THRESHOLD = datetime.datetime.strptime("17:00", "%H:%M")
-    
-    VATSAL_LATE_THRESHOLD = datetime.datetime.strptime("09:00", "%H:%M")
-    VATSAL_OUT_THRESHOLD = datetime.datetime.strptime("17:45", "%H:%M")
+     DEFAULT_LATE_THRESHOLD = datetime.datetime.strptime("08:45", "%H:%M")
+     DEFAULT_OUT_THRESHOLD = datetime.datetime.strptime("17:15", "%H:%M")
+     
+     SPECIAL_EMPLOYEES = ['Sagar T', 'Kalpan Shroff', 'Moin Shaikh', 'Sagar', 'Krunal']
+     SPECIAL_OUT_THRESHOLD = datetime.datetime.strptime("17:15", "%H:%M")
+     
+     VATSAL_LATE_THRESHOLD = datetime.datetime.strptime("09:00", "%H:%M")
+     VATSAL_OUT_THRESHOLD = datetime.datetime.strptime("17:15", "%H:%M")
 
     EXCLUDED_EMPLOYEES = ['Deendayal Sevag', 'Manish Jajoo', 'NAND KUMAR', 'deepak', 'ram', 'Dinesh Jii', 'Anuj']
     

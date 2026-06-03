@@ -36,10 +36,10 @@ def verify():
                     if val:
                         print(f"ERROR: Excluded employee {emp_name} has data at row {r+1}, col {c}: {val}")
             
-            # Check Vatsal's late by at a specific day if possible
-            if 'vatsal' in emp_name.lower():
-                # We need to find an InTime > 08:45 but < 09:00 if exists
-                pass
+             # Check Vatsal's late by at a specific day if possible
+             if 'vatsal' in emp_name.lower():
+                 # We need to find an InTime > 09:00 if exists (Vatsal's in time threshold)
+                 pass
 
     print(f"Found employees: {len(found_employees)}")
     for ex in EXCLUDED:
