@@ -269,20 +269,20 @@ def parse_work_duration_report(filepath):
                         late_out_mins = 0
                         is_work_status = status.strip().upper() == 'P'
                         if is_work_status or in_time.strip() or out_time.strip():
-                             # All employees have 08:45 in time and 17:15 out time
-                             target_in_str, target_out_str = ('08:45', '17:15')
-                            
+                            # All employees have 08:45 in time and 17:15 out time
+                            target_in_str, target_out_str = ('08:45', '17:15')
+
                             is_forgot_punch_in = False
                             is_forgot_punch_out = False
-                            
+
                             # If either punch is missing, treat the whole day as forgotten punch (fill both)
                             # Also handle case where Status is 'P' but both times are missing
-                            if (not in_time.strip() or not out_time.strip()):
+                            if not in_time.strip() or not out_time.strip():
                                 in_time = target_in_str
                                 out_time = target_out_str
                                 is_forgot_punch_in = True
                                 is_forgot_punch_out = True
-                            
+
                             # Always recalculate duration from in/out time
                             if in_time.strip() and out_time.strip():
                                 try:
@@ -298,39 +298,39 @@ def parse_work_duration_report(filepath):
                             early_going_mins = 0
                             late_mins = 0
                             late_out_mins = 0
-                            
+
                             if in_time.strip():
                                 try:
                                     t_actual_in = datetime.strptime(in_time.strip(), '%H:%M')
                                     t_target_in = datetime.strptime(target_in_str, '%H:%M')
                                     diff_in_mins = int((t_actual_in - t_target_in).total_seconds() / 60)
-                                    
+
                                     if diff_in_mins > 0:
                                         late_mins = diff_in_mins
                                     elif diff_in_mins < 0:
                                         early_arrival_mins = abs(diff_in_mins)
                                 except ValueError:
                                     pass
-                                    
+
                             if out_time.strip():
                                 try:
                                     t_actual_out = datetime.strptime(out_time.strip(), '%H:%M')
                                     t_target_out = datetime.strptime(target_out_str, '%H:%M')
                                     diff_out_mins = int((t_target_out - t_actual_out).total_seconds() / 60)
-                                    
+
                                     if diff_out_mins > 0:
                                         early_going_mins = diff_out_mins
                                     elif diff_out_mins < 0:
                                         late_out_mins = abs(diff_out_mins)
                                 except ValueError:
                                     pass
-                                    
+
                             # Set Late By
                             late_by = f"{late_mins // 60:02d}:{late_mins % 60:02d}"
-                            
+
                             # Early By represents "Early Departure" (leaving before Out Time)
                             early_by = f"{early_going_mins // 60:02d}:{early_going_mins % 60:02d}"
-                            
+
                             # Late Out represents extra time seated beyond Out Time
                             late_out = f"{late_out_mins // 60:02d}:{late_out_mins % 60:02d}"
 
